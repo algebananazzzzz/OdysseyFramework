@@ -25,7 +25,7 @@ stages:
 .deploy-variables:
   variables:
     WORKSPACE: $CI_ENVIRONMENT_NAME-webapp
-    FUNCTION_NAME: $CI_ENVIRONMENT_NAME-app-func-simple-api
+    FUNCTION_NAME: $CI_ENVIRONMENT_NAME-app-func-{{.Code}}
     SOURCE_ZIP_FILE: $OUTPUT_ZIP_FILE
     TF_VAR_FILE: ../config/$CI_ENVIRONMENT_NAME.tfvars
     TF_VAR_function_name: $FUNCTION_NAME

@@ -3,7 +3,7 @@
 # The target environment to which the resources will be deployed.
 env = "prd"
 # The code name of the project used for naming convention.
-project_code = "simple-api"
+project_code = "{{.Code}}"
 # The location of the deployment package containing the Lambda code.
 deployment_package_location = "../upload/build.zip"
 
