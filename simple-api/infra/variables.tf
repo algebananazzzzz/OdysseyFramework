@@ -11,6 +11,10 @@ variable "env" {
   description = "The target environment to which the resources will be deployed."
 }
 
+variable "function_name" {
+  description = "The name of the Lambda Function to be created."
+}
+
 variable "deployment_package_location" {
   description = "The location of the deployment package containing the Lambda code."
 }

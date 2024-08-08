@@ -1,6 +1,5 @@
 locals {
   execution_role_name = "${var.env}-mgmt-iamrole-${var.project_code}"
-  function_name       = "${var.env}-app-func-${var.project_code}"
 }
 
 
@@ -14,11 +13,12 @@ module "function_execution_role" {
 
 module "lambda_function" {
   source             = "../../modules/lambda_function"
-  function_name      = local.function_name
+  function_name      = var.function_name
   execution_role_arn = module.function_execution_role.role.arn
   deployment_package = {
     filename = "${path.module}/${var.deployment_package_location}"
   }
-  runtime = "provided.al2"
-  handler = "bootstrap"
+  ignore_deployment_package_changes = true
+  runtime                           = "python3.12"
+  handler                           = "lambda_function.lambda_handler"
 }
