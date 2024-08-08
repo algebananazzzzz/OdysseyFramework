@@ -1,0 +1,83 @@
+# Include external template files for reusable jobs
+include:
+  - project: algebananazzzzz/gitlabtemplates
+    ref: main
+    file:
+      - Jobs/terraform-jobs.yml
+      - Jobs/awscli-jobs.yml
+      - Jobs/utils-jobs.yml
+
+# Define global variables
+variables:
+  TF_DIR: $CI_PROJECT_DIR/infra
+  SOURCE_DIR: $CI_PROJECT_DIR/public
+
+# Define pipeline stages
+stages:
+  - "build"
+  - "test" # Consider adding actual test jobs in this stage
+  - "deploy-prd"
+  - "qa-prd" # Consider adding actual QA jobs in this stage
+
+# Define reusable variables for deployment jobs
+.deploy-variables:
+  variables:
+    WORKSPACE: $CI_ENVIRONMENT_NAME-web
+    BUCKET_NAME: $CI_ENVIRONMENT_NAME-app-s3-{{.Code}}
+    TF_VAR_FILE: ../config/$CI_ENVIRONMENT_NAME.tfvars
+    TF_VAR_origin_bucket_name: $BUCKET_NAME
+
+# Terraform plan job for production environment
+1-terraform-plan-prd:
+  stage: deploy-prd
+  environment:
+    name: prd
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  extends:
+    - .deploy-variables
+    - .terraform:plan
+  when: manual
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - infra/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+# Terraform apply job for production environment
+2-terraform-apply-prd:
+  stage: deploy-prd
+  environment:
+    name: prd
+  extends:
+    - .terraform:apply
+    - .terraform:output
+  needs:
+    - job: 1-terraform-plan-prd
+      optional: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - infra/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+# Lambda deployment job for production environment
+3-s3-deploy-prd:
+  stage: deploy-prd
+  environment:
+    name: prd
+    url: $site_domain_name
+  needs:
+    - job: 2-terraform-apply-prd
+      optional: true
+  extends:
+    - .deploy-variables
+    - .awscli:s3-sync
+  when: manual
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - public/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
