@@ -8,9 +8,6 @@
 .aws
 */.aws
 
-# Backend configuration file
-backend.tf
-
 # .tfstate and lock files
 *.tfstate
 *.tfstate.*
@@ -19,7 +16,7 @@ backend.tf
 # Exclude all .tfvars files
 *.tfvars
 *.tfvars.json
-!example.tfvars
+!template.tfvars
 
 # Ignore override files
 override.tf

@@ -1,7 +1,9 @@
 # Required Variables
 # -------------------------
+# The target region to which the resources will be deployed.
+aws_region = "{{.GlobalConfig.region}}"
 # The target environment to which the resources will be deployed.
-env = "prd"
+env = "{{.Env}}"
 # The code name of the project used for naming convention.
 project_code = "{{.Code}}"
 

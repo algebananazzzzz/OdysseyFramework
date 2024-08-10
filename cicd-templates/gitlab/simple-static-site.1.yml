@@ -37,7 +37,6 @@ stages:
   extends:
     - .deploy-variables
     - .terraform:plan
-  when: manual
   allow_failure: false
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -74,7 +73,6 @@ stages:
   extends:
     - .deploy-variables
     - .awscli:s3-sync
-  when: manual
   allow_failure: false
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

@@ -1,6 +1,5 @@
 variable "aws_region" {
   description = "The AWS region where resources will be deployed."
-  default     = "ap-southeast-1"
 }
 
 variable "project_code" {
