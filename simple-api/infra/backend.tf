@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket               = "com-all-bucket-tfstate-algebananazzzzz"
-    key                  = "simple-api.tfstate"
-    workspace_key_prefix = "tf-state"
-    region               = "ap-southeast-1"
+    bucket               = "{{.GlobalConfig.BackendConfig.Bucket}}"
+    key                  = "{{.Code}}"
+    workspace_key_prefix = "{{.GlobalConfig.BackendConfig.WorkspaceKeyPrefix}}"
+    region               = "{{.GlobalConfig.BackendConfig.Region}}"
   }
 }

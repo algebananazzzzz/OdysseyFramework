@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket               = "{{.GlobalConfig.BackendConfig.bucket}}"
+    bucket               = "{{.GlobalConfig.BackendConfig.Bucket}}"
     key                  = "{{.Code}}"
-    workspace_key_prefix = "{{.GlobalConfig.BackendConfig.workspace_key_prefix}}"
-    region               = "{{.GlobalConfig.BackendConfig.region}}"
+    workspace_key_prefix = "{{.GlobalConfig.BackendConfig.WorkspaceKeyPrefix}}"
+    region               = "{{.GlobalConfig.BackendConfig.Region}}"
   }
 }
