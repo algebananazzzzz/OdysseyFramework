@@ -16,6 +16,8 @@ variables:
 stages:
   - "build"
   - "test" # Consider adding actual test jobs in this stage
+  - "deploy-stg"
+  - "qa-stg" # Consider adding actual QA jobs in this stage
   - "deploy-prd"
   - "qa-prd" # Consider adding actual QA jobs in this stage
 
@@ -26,6 +28,60 @@ stages:
     BUCKET_NAME: $CI_ENVIRONMENT_NAME-app-s3-{{.Code}}
     TF_VAR_FILE: ../config/$CI_ENVIRONMENT_NAME.tfvars
     TF_VAR_origin_bucket_name: $BUCKET_NAME
+
+# Terraform plan job for staging environment
+1-terraform-plan-stg:
+  stage: deploy-stg
+  environment:
+    name: stg
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  extends:
+    - .deploy-variables
+    - .terraform:plan
+  when: manual
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - infra/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+# Terraform apply job for staging environment
+2-terraform-apply-stg:
+  stage: deploy-stg
+  environment:
+    name: stg
+  extends:
+    - .terraform:apply
+    - .terraform:output
+  needs:
+    - job: 1-terraform-plan-stg
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - infra/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+# Lambda deployment job for staging environment
+3-s3-deploy-stg:
+  stage: deploy-stg
+  environment:
+    name: stg
+    url: $site_domain_name
+  needs:
+    - job: 2-terraform-apply-stg
+      optional: true
+  extends:
+    - .deploy-variables
+    - .awscli:s3-sync
+  when: manual
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - public/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
 
 # Terraform plan job for production environment
 1-terraform-plan-prd:
@@ -55,7 +111,6 @@ stages:
     - .terraform:output
   needs:
     - job: 1-terraform-plan-prd
-      optional: true
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
