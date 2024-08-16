@@ -1,0 +1,116 @@
+{
+    "web_subnet_configuration": {
+        "prd-web-subnet-public-1a": {
+            "env": "prd",
+            "cidr_block": "10.0.0.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}a",
+            "usable_hosts": 2043
+        },
+        "prd-web-subnet-public-1b": {
+            "env": "prd",
+            "cidr_block": "10.0.8.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}b",
+            "usable_hosts": 2043
+        },
+        "stg-web-subnet-public-1a": {
+            "env": "stg",
+            "cidr_block": "10.0.64.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}a",
+            "usable_hosts": 2043
+        },
+        "stg-web-subnet-public-1b": {
+            "env": "stg",
+            "cidr_block": "10.0.72.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}b",
+            "usable_hosts": 2043
+        },
+        "com-web-subnet-public-1a": {
+            "env": "com",
+            "cidr_block": "10.0.128.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}a",
+            "usable_hosts": 2043
+        },
+        "com-web-subnet-public-1b": {
+            "env": "com",
+            "cidr_block": "10.0.136.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}b",
+            "usable_hosts": 2043
+        }
+    },
+    "app_subnet_configuration": {
+        "prd-app-subnet-public-1a": {
+            "env": "prd",
+            "cidr_block": "10.0.16.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}a",
+            "usable_hosts": 2043
+        },
+        "prd-app-subnet-public-1b": {
+            "env": "prd",
+            "cidr_block": "10.0.24.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}b",
+            "usable_hosts": 2043
+        },
+        "stg-app-subnet-public-1a": {
+            "env": "stg",
+            "cidr_block": "10.0.80.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}a",
+            "usable_hosts": 2043
+        },
+        "stg-app-subnet-public-1b": {
+            "env": "stg",
+            "cidr_block": "10.0.88.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}b",
+            "usable_hosts": 2043
+        },
+        "com-app-subnet-public-1a": {
+            "env": "com",
+            "cidr_block": "10.0.144.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}a",
+            "usable_hosts": 2043
+        },
+        "com-app-subnet-public-1b": {
+            "env": "com",
+            "cidr_block": "10.0.152.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}b",
+            "usable_hosts": 2043
+        }
+    },
+    "db_subnet_configuration": {
+        "prd-db-subnet-public-1a": {
+            "env": "prd",
+            "cidr_block": "10.0.32.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}a",
+            "usable_hosts": 2043
+        },
+        "prd-db-subnet-public-1b": {
+            "env": "prd",
+            "cidr_block": "10.0.40.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}b",
+            "usable_hosts": 2043
+        },
+        "stg-db-subnet-public-1a": {
+            "env": "stg",
+            "cidr_block": "10.0.96.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}a",
+            "usable_hosts": 2043
+        },
+        "stg-db-subnet-public-1b": {
+            "env": "stg",
+            "cidr_block": "10.0.104.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}b",
+            "usable_hosts": 2043
+        },
+        "com-db-subnet-public-1a": {
+            "env": "com",
+            "cidr_block": "10.0.160.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}a",
+            "usable_hosts": 2043
+        },
+        "com-db-subnet-public-1b": {
+            "env": "com",
+            "cidr_block": "10.0.168.0/21",
+            "availability_zone": "{{.GlobalConfig.Region}}b",
+            "usable_hosts": 2043
+        }
+    }
+}

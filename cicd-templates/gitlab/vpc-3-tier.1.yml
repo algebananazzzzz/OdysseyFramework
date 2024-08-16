@@ -1,0 +1,39 @@
+include:
+  - project: algebananazzzzz/gitlabtemplates
+    ref: main
+    file:
+      - Jobs/terraform-jobs.yml
+
+variables:
+  ENV:
+    value: "com"
+    options:
+      - "com"
+    description: "The target environment for deployment"
+  WORKSPACE:
+    value: $ENV-all
+  TF_DIR: $CI_PROJECT_DIR
+  TF_VAR_FILE: config/prd.tfvars
+
+stages:
+  - "plan"
+  - "deploy"
+
+terraform-plan:
+  variables:
+    TF_VAR_exclude_stg_environment: true
+  stage: plan
+  extends:
+    - .terraform:plan
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+terraform-apply:
+  stage: deploy
+  dependencies:
+    - terraform-plan
+  extends:
+    - .terraform:apply
+  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
