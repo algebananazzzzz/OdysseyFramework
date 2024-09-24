@@ -1,0 +1,140 @@
+# Include external template files for reusable jobs
+include:
+  - project: algebananazzzzz/gitlabtemplates
+    ref: main
+    file:
+      - Jobs/terraform-jobs.yml
+      - Jobs/awscli-jobs.yml
+      - Jobs/utils-jobs.yml
+
+# Define global variables
+variables:
+  TF_DIR: $CI_PROJECT_DIR/infra
+  OUTPUT_ZIP_FILE: $CI_PROJECT_DIR/upload/build.zip
+
+# Define pipeline stages
+stages:
+  - "build"
+  - "test" # Consider adding actual test jobs in this stage
+  - "deploy-stg"
+  - "qa-stg" # Consider adding actual QA jobs in this stage
+  - "deploy-prd"
+  - "qa-prd" # Consider adding actual QA jobs in this stage
+
+# Define reusable variables for deployment jobs
+.deploy-variables:
+  variables:
+    WORKSPACE: $CI_ENVIRONMENT_NAME-webapp
+    FUNCTION_NAME: $CI_ENVIRONMENT_NAME-app-func-{{.Code}}
+    AWS_REGION: "{{.GlobalConfig.Region}}"
+    ECR_REPOSITORY_NAME: $CI_ENVIRONMENT_NAME-app-ecrrepo-{{.Code}}
+    TF_VAR_FILE: ../config/$CI_ENVIRONMENT_NAME.tfvars
+    TF_VAR_function_name: $FUNCTION_NAME
+    TF_VAR_ecr_repository_name: $ECR_REPOSITORY_NAME
+
+# Terraform plan job for staging environment
+1-terraform-plan-stg:
+  stage: deploy-stg
+  environment:
+    name: stg
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  extends:
+    - .deploy-variables
+    - .terraform:plan
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - infra/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+# Terraform apply job for staging environment
+2-terraform-apply-stg:
+  stage: deploy-stg
+  environment:
+    name: stg
+  extends:
+    - .terraform:apply
+    - .terraform:output
+  needs:
+    - job: 1-terraform-plan-stg
+      optional: true
+    - job: code-build
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - infra/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+# Lambda deployment job for staging environment
+3-lambda-deploy-stg:
+  stage: deploy-stg
+  environment:
+    name: stg
+    url: $invoke_url
+  needs:
+    - job: 2-terraform-apply-stg
+      optional: true
+  extends:
+    - .deploy-variables
+    - .awscli:lambda-deploy-image
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - src/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+# Terraform plan job for production environment
+1-terraform-plan-prd:
+  stage: deploy-prd
+  environment:
+    name: prd
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  extends:
+    - .deploy-variables
+    - .terraform:plan
+  when: manual
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - infra/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+# Terraform apply job for production environment
+2-terraform-apply-prd:
+  stage: deploy-prd
+  environment:
+    name: prd
+  extends:
+    - .terraform:apply
+    - .terraform:output
+  needs:
+    - job: 1-terraform-plan-prd
+      optional: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - infra/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+# Lambda deployment job for production environment
+3-lambda-deploy-prd:
+  stage: deploy-prd
+  environment:
+    name: prd
+    url: $invoke_url
+  needs:
+    - job: 2-terraform-apply-prd
+      optional: true
+  extends:
+    - .deploy-variables
+    - .awscli:lambda-deploy-image
+  when: manual
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - src/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
