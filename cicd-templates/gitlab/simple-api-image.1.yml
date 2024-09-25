@@ -30,20 +30,6 @@ stages:
     TF_VAR_function_name: $FUNCTION_NAME
     TF_VAR_ecr_repository_name: $ECR_REPOSITORY_NAME
 
-# Build job: Create a image from the source code
-docker-build:
-  stage: build
-  variables:
-    Dockerfile: $CI_PROJECT_DIR/Dockerfile
-  extends:
-    - .docker:build
-    - .aws:ecr-push-image
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes:
-        - src/**/*
-    - if: $CI_PIPELINE_SOURCE == "web"
-
 # Terraform plan job for production environment
 1-terraform-plan-prd:
   stage: deploy-prd
