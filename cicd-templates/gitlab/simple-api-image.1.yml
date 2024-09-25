@@ -5,6 +5,7 @@ include:
     file:
       - Jobs/terraform-jobs.yml
       - Jobs/awscli-jobs.yml
+      - Jobs/docker-jobs.yml
       - Jobs/utils-jobs.yml
 
 # Define global variables
@@ -25,10 +26,31 @@ stages:
     WORKSPACE: $CI_ENVIRONMENT_NAME-webapp
     FUNCTION_NAME: $CI_ENVIRONMENT_NAME-app-func-{{.Code}}
     AWS_REGION: "{{.GlobalConfig.Region}}"
-    ECR_REPOSITORY_NAME: $CI_ENVIRONMENT_NAME-app-ecrrepo-{{.Code}}
+    ECR_REPOSITORY_NAME: com-app-ecrrepo-{{.Code}}
+    SOURCE_DIR: $CI_PROJECT_DIR
     TF_VAR_FILE: ../config/$CI_ENVIRONMENT_NAME.tfvars
     TF_VAR_function_name: $FUNCTION_NAME
-    TF_VAR_ecr_repository_name: $ECR_REPOSITORY_NAME
+
+# Build job: Build and push the image to ECR
+image-build:
+  stage: build
+  variables:
+    IMAGE_TAGS: $CI_COMMIT_SHA $CI_COMMIT_BRANCH $CI_COMMIT_TIMESTAMP
+  extends:
+    - .deploy-variables
+    - .awscli:ecr-login
+    - .docker:build-and-push
+  after_script:
+    - echo "ECR_IMAGE_URI=$REPOSITORY_URI:$CI_COMMIT_SHA" > deploy.env
+    - echo "TF_VAR_ecr_image_uri=$REPOSITORY_URI:$CI_COMMIT_SHA" >> deploy.env
+  artifacts:
+    reports:
+      dotenv: deploy.env
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - src/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
 
 # Terraform plan job for production environment
 1-terraform-plan-prd:
@@ -71,10 +93,11 @@ stages:
     name: prd
     url: $invoke_url
   needs:
+    - job: image-build
     - job: 2-terraform-apply-prd
       optional: true
   extends:
-    - .deploy-variables
+    - .awscli:ecr-login
     - .awscli:lambda-deploy-image
   allow_failure: false
   rules:

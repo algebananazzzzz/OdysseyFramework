@@ -14,8 +14,8 @@ variable "function_name" {
   description = "The name of the Lambda Function to be created."
 }
 
-variable "ecr_repository_name" {
-  description = "The name of the ECR repository to host lambda images."
+variable "ecr_image_uri" {
+  description = "The URI of the ECR image to deploy to the Lambda Function."
 }
 
 variable "custom_domain_name" {

@@ -16,7 +16,7 @@ module "lambda_function" {
   function_name      = var.function_name
   execution_role_arn = module.function_execution_role.role.arn
   deployment_package = {
-    image_uri = "public.ecr.aws/lambda/nodejs:20"
+    image_uri = var.ecr_image_uri
   }
   ignore_deployment_package_changes = true
   handler                           = "lambda_function.lambda_handler"
